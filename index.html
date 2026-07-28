@@ -280,7 +280,7 @@
 </div>
 
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxLk4pasr7bc0enaLMkcA8z_NNifd-4ismBzHKPd-kRdcMnuyOy_NLdFGdw3n5kHMHu/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsWoM8vuZjpnYxizLoR17zHftV9kcXL-QQqBJfDhCXrl7AyF7LGEDnPJB3J_CUb5rp/exec";
 
     document.getElementById('invDate').value = new Date().toISOString().split('T')[0];
 
@@ -362,7 +362,6 @@
         document.getElementById('reffNo').value = '';
         document.getElementById('invNo').value = nextInvNo;
         
-        // Reset item table
         document.querySelector('#itemsTable tbody').innerHTML = '';
         addRow();
         
@@ -432,17 +431,20 @@
 
         alert("Sedang mencari data...");
 
-        fetch(`${GOOGLE_SCRIPT_URL}?search=${encodeURIComponent(query)}`)
-        .then(res => res.json())
-        .then(data => {
-            if(data.length === 0) {
+        const script = document.createElement('script');
+        const callbackName = 'handleSearchResponse_' + Math.round(Math.random() * 100000);
+        
+        window[callbackName] = function(data) {
+            delete window[callbackName];
+            document.body.removeChild(script);
+
+            if(!data || data.length === 0) {
                 alert("Rekod tidak dijumpai.");
                 return;
             }
 
-            let match = data[data.length - 1]; // Ambil rekod terkini jika ada banyak
+            let match = data[data.length - 1];
             
-            // Isi semula borang
             document.getElementById('officer').value = match.officer || 'Nurul Atiqah';
             document.getElementById('typeName').value = match.typeName || 'Invoice';
             document.getElementById('invNo').value = match.invNo || '';
@@ -453,7 +455,6 @@
             document.getElementById('client2').value = match.client2 || '';
             document.getElementById('phone').value = match.phone || '';
 
-            // Re-build jadual item
             let tbody = document.querySelector('#itemsTable tbody');
             tbody.innerHTML = '';
 
@@ -467,10 +468,15 @@
 
             updatePageTitle();
             alert(`✅ Rekod Invois #${match.invNo} berjaya dimuatkan! Anda kini boleh klik 'PDF / PRINT' untuk cetak semula.`);
-        })
-        .catch(err => {
-            alert("❌ Ralat semasa carian: " + err);
-        });
+        };
+
+        script.src = `${GOOGLE_SCRIPT_URL}?search=${encodeURIComponent(query)}&callback=${callbackName}`;
+        script.onerror = function() {
+            alert("❌ Gagal berhubung dengan Google Sheet. Sila pastikan Google Apps Script telah di-Deploy semula sebagai 'Anyone'.");
+            delete window[callbackName];
+            document.body.removeChild(script);
+        };
+        document.body.appendChild(script);
     }
 </script>
 
