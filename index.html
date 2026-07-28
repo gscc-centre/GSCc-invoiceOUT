@@ -8,7 +8,6 @@
         * { box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background-color: #eef2f5; margin: 0; padding: 10px; }
         
-        /* Container luar dengan skrol mendatar jika skrin telefon kecil */
         .outer-container {
             width: 100%;
             overflow-x: auto;
@@ -21,7 +20,7 @@
             justify-content: flex-start; 
             align-items: flex-start; 
             gap: 15px; 
-            min-width: 1050px; /* Memastikan ruang mencukupi supaya tidak terpotong */
+            min-width: 1050px; 
             margin: auto; 
         }
 
@@ -32,6 +31,34 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1); 
             background: #fff; 
             flex-shrink: 0;
+        }
+
+        /* Ruang Carian (Search Bar) */
+        .search-container {
+            background-color: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .search-container input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        .search-container button {
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
         }
 
         .header-title { background-color: #2e7d32; color: #fff; text-align: center; padding: 10px; font-size: 26px; font-weight: bold; margin-bottom: 20px; border-radius: 4px; }
@@ -68,7 +95,6 @@
         .text-right { text-align: right; }
         .btn-delete { background-color: #f44336; color: white; border: none; padding: 3px 8px; cursor: pointer; border-radius: 3px; font-weight: bold; }
 
-        /* Panel Butang Kanan (Tetap di kanan bila scroll di HP) */
         .action-panel { 
             width: 150px; 
             display: flex; 
@@ -85,11 +111,10 @@
         .btn-save { background-color: #2e7d32; color: white; }
         .btn-print { background-color: #007bff; color: white; }
         .btn-reset { background-color: #d32f2f; color: white; margin-top: 40px; }
-        .action-btn:hover { opacity: 0.9; }
 
-        /* Khas untuk Cetakan (PDF) */
         @media print {
             body { background-color: #fff; padding: 0; }
+            .search-container { display: none !important; }
             .outer-container { overflow: visible; }
             .main-wrapper { min-width: 100%; display: block; }
             .action-panel { display: none !important; }
@@ -102,8 +127,15 @@
 
 <div class="outer-container">
     <div class="main-wrapper">
-        <!-- Invoice Area -->
         <div class="invoice-box" id="invoiceArea">
+            
+            <!-- Ruang Carian Rekod -->
+            <div class="search-container">
+                <span style="font-weight: bold; font-size: 13px; color: #2e7d32;">🔍 CARI REKOD:</span>
+                <input type="text" id="searchInput" placeholder="Taip No. Invois atau Nama Pelajar/Klien...">
+                <button onclick="searchInvoice()">CARI</button>
+            </div>
+
             <div class="header-title">IN / OR / QO</div>
 
             <div class="top-container">
@@ -238,7 +270,6 @@
             </div>
         </div>
 
-        <!-- Action Panel -->
         <div class="action-panel">
             <button class="action-btn btn-new" onclick="newInvoice()">📄 NEW</button>
             <button class="action-btn btn-save" onclick="saveToGoogleSheet()">💾 SAVE</button>
@@ -277,7 +308,7 @@
         document.getElementById('grandTotal').innerText = subtotal.toFixed(2);
     }
 
-    function addRow() {
+    function addRow(cat='', desc='', qty=1, price=0) {
         let table = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
         let rowCount = table.rows.length + 1;
         let row = table.insertRow();
@@ -286,19 +317,20 @@
             <td class="row-num">${rowCount}</td>
             <td>
                 <select class="item-cat" style="width: 100%; padding: 4px;">
-                    <option value="Yuran">Yuran</option>
-                    <option value="Terapi">Terapi</option>
-                    <option value="Program">Program</option>
-                    <option value="Luar">Luar</option>
-                    <option value="Lain-lain">Lain-lain</option>
+                    <option value="Yuran" ${cat==='Yuran'?'selected':''}>Yuran</option>
+                    <option value="Terapi" ${cat==='Terapi'?'selected':''}>Terapi</option>
+                    <option value="Program" ${cat==='Program'?'selected':''}>Program</option>
+                    <option value="Luar" ${cat==='Luar'?'selected':''}>Luar</option>
+                    <option value="Lain-lain" ${cat==='Lain-lain'?'selected':''}>Lain-lain</option>
                 </select>
             </td>
-            <td><input type="text" class="item-desc" style="width: 95%; padding: 4px;" placeholder="Penerangan details"></td>
-            <td><input type="number" class="qty" value="1" min="1" style="width: 80%; padding: 4px;" onchange="calculateTotals()"></td>
-            <td><input type="number" class="price" value="0.00" step="0.01" style="width: 85%; padding: 4px;" onchange="calculateTotals()"></td>
+            <td><input type="text" class="item-desc" style="width: 95%; padding: 4px;" value="${desc}" placeholder="Penerangan details"></td>
+            <td><input type="number" class="qty" value="${qty}" min="1" style="width: 80%; padding: 4px;" onchange="calculateTotals()"></td>
+            <td><input type="number" class="price" value="${price}" step="0.01" style="width: 85%; padding: 4px;" onchange="calculateTotals()"></td>
             <td class="text-right row-total">0.00</td>
             <td><button class="btn-delete" onclick="deleteRow(this)">X</button></td>
         `;
+        calculateTotals();
     }
 
     function deleteRow(btn) {
@@ -330,6 +362,10 @@
         document.getElementById('reffNo').value = '';
         document.getElementById('invNo').value = nextInvNo;
         
+        // Reset item table
+        document.querySelector('#itemsTable tbody').innerHTML = '';
+        addRow();
+        
         updatePageTitle();
         alert(`Borang telah dibersihkan. Nombor Invois seterusnya: ${nextInvNo}`);
     }
@@ -343,13 +379,17 @@
     function saveToGoogleSheet() {
         updatePageTitle();
 
-        let items = [];
+        let itemsSummary = [];
+        let rawItems = [];
+
         document.querySelectorAll('#itemsTable tbody tr').forEach(row => {
             let cat = row.querySelector('.item-cat').value;
             let desc = row.querySelector('.item-desc').value;
             let qty = row.querySelector('.qty').value;
             let price = row.querySelector('.price').value;
-            items.push(`${cat} (${desc}) - Qty:${qty} x RM${price}`);
+
+            itemsSummary.push(`${cat} (${desc}) - Qty:${qty} x RM${price}`);
+            rawItems.push({ cat, desc, qty, price });
         });
 
         let payload = {
@@ -362,11 +402,12 @@
             client1: document.getElementById('client1').value,
             client2: document.getElementById('client2').value,
             phone: document.getElementById('phone').value,
-            itemsSummary: items.join(" | "),
+            itemsSummary: itemsSummary.join(" | "),
+            rawItems: rawItems,
             grandTotal: document.getElementById('grandTotal').innerText
         };
 
-        alert("Sedang menyimpan data ke Google Sheet...");
+        alert("Sedang menyimpan data...");
 
         fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
@@ -378,7 +419,57 @@
             alert("✅ Data berjaya disimpan ke Google Sheet!");
         })
         .catch(err => {
-            alert("❌ Ralat berlaku semasa menyimpan data: " + err);
+            alert("❌ Ralat berlaku: " + err);
+        });
+    }
+
+    function searchInvoice() {
+        let query = document.getElementById('searchInput').value.trim();
+        if(!query) {
+            alert("Sila masukkan No. Invois atau Nama Pelajar/Klien.");
+            return;
+        }
+
+        alert("Sedang mencari data...");
+
+        fetch(`${GOOGLE_SCRIPT_URL}?search=${encodeURIComponent(query)}`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.length === 0) {
+                alert("Rekod tidak dijumpai.");
+                return;
+            }
+
+            let match = data[data.length - 1]; // Ambil rekod terkini jika ada banyak
+            
+            // Isi semula borang
+            document.getElementById('officer').value = match.officer || 'Nurul Atiqah';
+            document.getElementById('typeName').value = match.typeName || 'Invoice';
+            document.getElementById('invNo').value = match.invNo || '';
+            document.getElementById('invDate').value = match.invDate ? match.invDate.split('T')[0] : '';
+            document.getElementById('dueDate').value = match.dueDate ? match.dueDate.split('T')[0] : '';
+            document.getElementById('reffNo').value = match.reffNo || '';
+            document.getElementById('client1').value = match.client1 || '';
+            document.getElementById('client2').value = match.client2 || '';
+            document.getElementById('phone').value = match.phone || '';
+
+            // Re-build jadual item
+            let tbody = document.querySelector('#itemsTable tbody');
+            tbody.innerHTML = '';
+
+            if(match.rawItems && match.rawItems.length > 0) {
+                match.rawItems.forEach(item => {
+                    addRow(item.cat, item.desc, item.qty, item.price);
+                });
+            } else {
+                addRow();
+            }
+
+            updatePageTitle();
+            alert(`✅ Rekod Invois #${match.invNo} berjaya dimuatkan! Anda kini boleh klik 'PDF / PRINT' untuk cetak semula.`);
+        })
+        .catch(err => {
+            alert("❌ Ralat semasa carian: " + err);
         });
     }
 </script>
