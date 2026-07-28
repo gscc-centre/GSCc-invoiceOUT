@@ -33,7 +33,6 @@
             flex-shrink: 0;
         }
 
-        /* Ruang Carian (Search Bar) */
         .search-container {
             background-color: #e8f5e9;
             border: 1px solid #a5d6a7;
@@ -195,7 +194,7 @@
                 <div class="client-right">
                     <div class="form-group">
                         <label>Invoice No:</label>
-                        <input type="text" id="invNo" value="20260001" oninput="updatePageTitle()">
+                        <input type="text" id="invNo" value="Memuatkan..." oninput="updatePageTitle()">
                     </div>
                     <div class="form-group">
                         <label>Invoice Date:</label>
@@ -280,16 +279,43 @@
 </div>
 
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsWoM8vuZjpnYxizLoR17zHftV9kcXL-QQqBJfDhCXrl7AyF7LGEDnPJB3J_CUb5rp/exec";
+    // URL Google Apps Script baharu yang anda berikan
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxcZx61pAR4G4KCZTkOknhlGqxC9f05qLZbxy4nSUnfvtPuwtSoo86kk7PcUI677-7U/exec";
 
     document.getElementById('invDate').value = new Date().toISOString().split('T')[0];
+
+    // Auto-fetch nombor invois terkini sebaik sahaja buka web
+    window.onload = function() {
+        fetchNextInvNo();
+    };
+
+    function fetchNextInvNo() {
+        const script = document.createElement('script');
+        const callbackName = 'handleNextInvNo_' + Math.round(Math.random() * 100000);
+        
+        window[callbackName] = function(data) {
+            delete window[callbackName];
+            document.body.removeChild(script);
+
+            if(data && data.nextInvNo) {
+                document.getElementById('invNo').value = data.nextInvNo;
+                updatePageTitle();
+            }
+        };
+
+        script.src = `${GOOGLE_SCRIPT_URL}?action=getNextInvNo&callback=${callbackName}`;
+        script.onerror = function() {
+            document.getElementById('invNo').value = "20260001";
+            delete window[callbackName];
+            document.body.removeChild(script);
+        };
+        document.body.appendChild(script);
+    }
 
     function updatePageTitle() {
         let invNo = document.getElementById('invNo').value.trim();
         document.title = `IN _ OR _ QO System ${invNo}`;
     }
-
-    updatePageTitle();
 
     function calculateTotals() {
         let rows = document.querySelectorAll('#itemsTable tbody tr');
@@ -353,20 +379,17 @@
     }
 
     function newInvoice() {
-        let currentInvNo = parseInt(document.getElementById('invNo').value) || 20260000;
-        let nextInvNo = currentInvNo + 1;
-        
         document.getElementById('client1').value = '';
         document.getElementById('client2').value = '';
         document.getElementById('phone').value = '';
         document.getElementById('reffNo').value = '';
-        document.getElementById('invNo').value = nextInvNo;
         
         document.querySelector('#itemsTable tbody').innerHTML = '';
         addRow();
         
-        updatePageTitle();
-        alert(`Borang telah dibersihkan. Nombor Invois seterusnya: ${nextInvNo}`);
+        // Tarik nombor invois terkini dari Google Sheet
+        fetchNextInvNo();
+        alert("Borang telah dibersihkan & Nombor Invois terkini diambil dari Google Sheet.");
     }
 
     function resetForm() {
@@ -472,7 +495,7 @@
 
         script.src = `${GOOGLE_SCRIPT_URL}?search=${encodeURIComponent(query)}&callback=${callbackName}`;
         script.onerror = function() {
-            alert("❌ Gagal berhubung dengan Google Sheet. Sila pastikan Google Apps Script telah di-Deploy semula sebagai 'Anyone'.");
+            alert("❌ Gagal berhubung dengan Google Sheet.");
             delete window[callbackName];
             document.body.removeChild(script);
         };
