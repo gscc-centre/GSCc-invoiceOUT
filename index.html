@@ -128,7 +128,6 @@
     <div class="main-wrapper">
         <div class="invoice-box" id="invoiceArea">
             
-            <!-- Ruang Carian Rekod -->
             <div class="search-container">
                 <span style="font-weight: bold; font-size: 13px; color: #2e7d32;">🔍 CARI REKOD:</span>
                 <input type="text" id="searchInput" placeholder="Taip No. Invois atau Nama Pelajar/Klien...">
@@ -279,17 +278,16 @@
 </div>
 
 <script>
-    // URL Google Apps Script baharu yang anda berikan
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxcZx61pAR4G4KCZTkOknhlGqxC9f05qLZbxy4nSUnfvtPuwtSoo86kk7PcUI677-7U/exec";
+    // URL Google Apps Script Baharu Anda
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzxfpepKJV0ipEaD7Ql2KnYTE12Rqt-JC-wIbImzqx1Djwc0WSeQC30hEblht1N83gW/exec";
 
     document.getElementById('invDate').value = new Date().toISOString().split('T')[0];
 
-    // Auto-fetch nombor invois terkini sebaik sahaja buka web
     window.onload = function() {
         fetchNextInvNo();
     };
 
-    function fetchNextInvNo() {
+    function fetchNextInvNo(callbackAlert = false) {
         const script = document.createElement('script');
         const callbackName = 'handleNextInvNo_' + Math.round(Math.random() * 100000);
         
@@ -300,6 +298,9 @@
             if(data && data.nextInvNo) {
                 document.getElementById('invNo').value = data.nextInvNo;
                 updatePageTitle();
+                if(callbackAlert) {
+                    alert(`✅ Borang dibersihkan. Nombor Invois Baru: #${data.nextInvNo}`);
+                }
             }
         };
 
@@ -383,13 +384,12 @@
         document.getElementById('client2').value = '';
         document.getElementById('phone').value = '';
         document.getElementById('reffNo').value = '';
+        document.getElementById('invNo').value = 'Memuatkan...';
         
         document.querySelector('#itemsTable tbody').innerHTML = '';
         addRow();
         
-        // Tarik nombor invois terkini dari Google Sheet
-        fetchNextInvNo();
-        alert("Borang telah dibersihkan & Nombor Invois terkini diambil dari Google Sheet.");
+        fetchNextInvNo(true);
     }
 
     function resetForm() {
@@ -434,7 +434,7 @@
         fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
             mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify(payload)
         })
         .then(() => {
