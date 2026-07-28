@@ -229,8 +229,7 @@
                             <select class="item-cat" style="width: 100%; padding: 4px;">
                                 <option value="Yuran">Yuran</option>
                                 <option value="Terapi">Terapi</option>
-                                <option value="Program">Program</option>
-                                <option value="Luar">Luar</option>
+                                <option value="Program Luar">Program Luar</option>
                                 <option value="Lain-lain">Lain-lain</option>
                             </select>
                         </td>
@@ -278,7 +277,6 @@
 </div>
 
 <script>
-    // URL Google Apps Script Baharu Anda
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby7PsHc6RvGbLiUEJBzcn4t0uumWeb1GjOf2ri_UOswmhvFJsnoj9AOaof37QJAjdFK/exec";
 
     document.getElementById('invDate').value = new Date().toISOString().split('T')[0];
@@ -346,8 +344,7 @@
                 <select class="item-cat" style="width: 100%; padding: 4px;">
                     <option value="Yuran" ${cat==='Yuran'?'selected':''}>Yuran</option>
                     <option value="Terapi" ${cat==='Terapi'?'selected':''}>Terapi</option>
-                    <option value="Program" ${cat==='Program'?'selected':''}>Program</option>
-                    <option value="Luar" ${cat==='Luar'?'selected':''}>Luar</option>
+                    <option value="Program Luar" ${cat==='Program Luar' || cat==='Program' || cat==='Luar' ?'selected':''}>Program Luar</option>
                     <option value="Lain-lain" ${cat==='Lain-lain'?'selected':''}>Lain-lain</option>
                 </select>
             </td>
